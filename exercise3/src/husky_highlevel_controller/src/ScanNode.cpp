@@ -49,25 +49,26 @@ void ScanNode::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
         return;
     }
 
-    /*ROS_INFO_STREAM("Measurement " << minIndex << " had the min distance of " << closest << std::endl);*/
     // Estimate the position of the pillar relative to the robot.
     // The minimum distance displayed by the scanner is the hypotenuse of a triangle.
     // The angle is given in the measurement via a start angle and increment per measurement.
     // The angle is in radians.
     float angle = minIndex * scan->angle_increment + scan->angle_min;
-    // We have the hypotenuse and angle, so we find x and y with sine and cosine.
+    // We have the hypotenuse and angle, so we find x and y distances of the pillar 
+    // from the robot with sine and cosine (they're the legs of the triangle).
     float y = -1.0 * sin(angle) * closest;
     float x = cos(angle) * closest;
 
     // Display the estimated location of the pillar.
     visualization_msgs::Marker estimatedPillar;
-    // The origin of the coordinate plane is the center of mass of the robot. 
+    // /base_link sets the origin of the coordinate plane at the center of mass of the robot. 
     estimatedPillar.header.frame_id = "/base_link";
     estimatedPillar.header.stamp = ros::Time();
     estimatedPillar.type = visualization_msgs::Marker::SPHERE;
     estimatedPillar.action = visualization_msgs::Marker::ADD;
 
-    // Because the origin is at the robot, this is relative to the robot.
+    // Because the origin is at the robot, this marker's position is 
+    // specified relative to the robot.
     estimatedPillar.pose.position.x = x;
     estimatedPillar.pose.position.y = y;
     estimatedPillar.pose.position.z = 0;
@@ -93,13 +94,11 @@ void ScanNode::scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
     // P controller: turn/drive forward at a speed proportional to the 
     // error- the gain is user-specified. 
     // Forward velocity error is proportional to the straight-line distance
-    // from the robot to the pillar (x-axis), in m/s.
-    float forwardError = x * pGain_;
+    // from the robot to the pillar, in m/s.
+    float forwardError = closest * pGain_;
     // Turn velocity error is proportional to the angle that the robot is off by,
     // in radians/second.  
     float turnError = -1.0 * angle * pGain_;
-
-    // ROS_INFO_STREAM(angle << " " << turnError << std::endl);
 
     // Send the velocity to the motors.
     geometry_msgs::Twist newVel;
