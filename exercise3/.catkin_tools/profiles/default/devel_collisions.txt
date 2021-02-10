@@ -1,0 +1,2 @@
+/home/michaelli1234/eth_ros_class/exercise2/devel/./cmake.lock 24
+/home/michaelli1234/eth_ros_class/exercise3/devel/./cmake.lock 50
