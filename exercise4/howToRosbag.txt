@@ -1,0 +1,5 @@
+For this one, you need to run the launch file and then rosbag play ./husky_navigation.bag
+(downloadable from the eth ros course site). The launch file publishes the robot's model
+and listens to the bag's ekf data/lidar data in order to play back the actual measurements.
+rviz can play the lidar data and odometry data and rqt_multiplot and plot the position
+and other measurements.
